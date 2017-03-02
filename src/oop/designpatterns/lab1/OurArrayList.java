@@ -1,11 +1,12 @@
 package oop.designpatterns.lab1;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.*;
 
 /**
  * Created by Anton on 2017-03-02.
  */
-public class OurArrayList<T> implements List<T> {
+public class OurArrayList<T> extends AbstractList<T> {
 
     private T[] arr = (T[])new Object[10];
     private int size = 0;
@@ -32,36 +33,6 @@ public class OurArrayList<T> implements List<T> {
         return false;
     }
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-
-        for(Object o : c){
-            if(!contains(o))
-                return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<? extends T> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void clear() {
@@ -111,30 +82,11 @@ public class OurArrayList<T> implements List<T> {
             arr[i] = arr[i+1];
         }
         */
-        
+
         size--;
         return temp;
     }
 
-    @Override
-    public int indexOf(Object o) {
-        for(int i = 0; i < size(); i++)
-        {
-            if(o.equals(arr[i]))
-                return i;
-        }
-        return -1;
-    }
-
-    @Override
-    public int lastIndexOf(Object o) {
-        for(int i = size()-1; i > -1 ; i--)
-        {
-            if(o.equals(arr[i]))
-                return i;
-        }
-        return -1;
-    }
 
     @Override
     public ListIterator<T> listIterator() {
@@ -156,29 +108,9 @@ public class OurArrayList<T> implements List<T> {
         if(fromIndex > toIndex || toIndex > size() || fromIndex < 0)
             throw new IndexOutOfBoundsException();
 
-        List<T> sub = new OurArrayList<T>();
-
-        for(int i = fromIndex; i < toIndex;i++){
-            sub.add(arr[i]);
-        }
-
-        return sub;
+        return null;
     }
 
-    @Override
-    public int size() {
-        return size;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size==0;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        return indexOf(o) != -1;
-    }
 
     public boolean equals(Object o){
 
@@ -198,15 +130,6 @@ public class OurArrayList<T> implements List<T> {
         return true;
     }
 
-    public int hashCode(){
-        int hashCode = 1;
-
-        for(T t : this)
-            hashCode = 31*hashCode + (t==null? 0 : t.hashCode());
-
-        return hashCode;
-    }
-
     private void increaseSize(){
 
         T[] newArr = (T[])new Object[(arr.length*2)];
@@ -223,30 +146,95 @@ public class OurArrayList<T> implements List<T> {
         return new MyIterator();
     }
 
-    @Override
-    public Object[] toArray() {
-        Object[] newArr = new Object[size()];
+    private class SubList extends AbstractList<T>{
 
-        for(int i = 0; i < size; i++)
-            newArr[i] = arr[i];
+        private int floor, roof;
 
-        return newArr;
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        if(a.length < size())
-            a = (T1[]) new Object[size()];
-
-        if(a.length > size()){
-            a[size()] = null;
+        public SubList(int fromIndex, int toIndex){
+            this.floor = fromIndex;
+            this.roof = toIndex;
         }
 
-        for(int i = 0; i < size(); i++){
-            a[i] = (T1)arr[i];
+        @Override
+        public Iterator<T> iterator() {
+            return null;
         }
 
-        return a;
+        @Override
+        public boolean add(T t) {
+            OurArrayList.this.add(roof, t);
+            return true;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            int index = OurArrayList.this.indexOf(o);
+            if(index > floor && index < roof)
+                return OurArrayList.this.remove(o);
+            else{
+                return false;
+            }
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            return OurArrayList.this.addAll(c);
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends T> c) {
+            return OurArrayList.this.addAll(index, c);
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            return OurArrayList.this.removeAll(c);
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            return OurArrayList.this.retainAll(c);
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public T get(int index) {
+            return null;
+        }
+
+        @Override
+        public T set(int index, T element) {
+            return OurArrayList.this.set(index, element);
+        }
+
+        @Override
+        public void add(int index, T element) {
+
+        }
+
+        @Override
+        public T remove(int index) {
+            return null;
+        }
+
+        @Override
+        public ListIterator<T> listIterator() {
+            return null;
+        }
+
+        @Override
+        public ListIterator<T> listIterator(int index) {
+            return null;
+        }
+
+        @Override
+        public List<T> subList(int fromIndex, int toIndex) {
+            return null;
+        }
     }
 
     private class MyIterator implements Iterator<T>{
@@ -354,6 +342,27 @@ public class OurArrayList<T> implements List<T> {
             OurArrayList.this.add(cursor, t);
             added = true;
         }
+    }
+
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends T> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
     }
 
 }

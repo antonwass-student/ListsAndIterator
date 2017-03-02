@@ -7,10 +7,25 @@ public class Main {
     public static void main(String[] args) {
 	    List<Integer> list = new OurArrayList<>();
 
-        funcTest(list);
+        //funcTest(list);
 
-        performanceTest(new ArrayList<Integer>());
-        performanceTest(list);
+        //performanceTest(new ArrayList<Integer>());
+        //performanceTest(list);
+
+
+        IList<Integer> linkedList = new OurLinkedList<>();
+
+        for(int i = 0; i < 100; i++)
+            linkedList.add(i);
+
+        linkedList.add(8, 10000);
+        linkedList.add(2, 10000);
+        linkedList.remove(3);
+        linkedList.remove((Integer)5);
+
+        for(int i = 0; i < 100; i++)
+            System.out.println(linkedList.get(i));
+
 
     }
 
