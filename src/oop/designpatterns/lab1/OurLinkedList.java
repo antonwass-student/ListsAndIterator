@@ -57,7 +57,7 @@ public class OurLinkedList<T> implements IList<T> {
 
     @Override
     public void remove(T o) {
-       
+
 
     }
 
