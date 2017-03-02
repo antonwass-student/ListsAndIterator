@@ -6,7 +6,7 @@ package oop.designpatterns.lab1;
 public class OurNode<T>{
 
     private T data;
-    private OurNode next;
+    private OurNode<T> next;
 
     public OurNode(T item){
         data = item;
@@ -17,7 +17,7 @@ public class OurNode<T>{
         return data;
     }
 
-    public OurNode getNext(){
+    public OurNode<T> getNext(){
         return next;
     }
 

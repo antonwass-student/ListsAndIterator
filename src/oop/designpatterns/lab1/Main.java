@@ -5,19 +5,20 @@ import java.util.Iterator;
 public class Main {
 
     public static void main(String[] args) {
-	    OurArrayList<Integer> numbers = new OurArrayList<>();
 
+
+
+        OurLinkedList<Integer> linkedNumbers = new OurLinkedList<>();
         for(int i = 0; i < 100; i++){
-            numbers.add(i);
+            linkedNumbers.add(i);
         }
 
-        Iterator<Integer> it = numbers.iterator();
-        while(it.hasNext()){
-            System.out.println(it.next());
+        linkedNumbers.add(2,4);
+        System.out.println("SIZE: "+ linkedNumbers.size());
+
+        for (int i = 0; i < linkedNumbers.size(); i++){
+            System.out.println(linkedNumbers.get(i));
         }
-
-        for(Integer i : numbers)
-
 
 
     }

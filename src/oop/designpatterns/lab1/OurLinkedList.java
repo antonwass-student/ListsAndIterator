@@ -1,46 +1,78 @@
 package oop.designpatterns.lab1;
 
-public class OurLinkedList<T> implements IList {
-	private OurNode head;
+/**
+ * Created by chris on 2017-03-02.
+ */
+public class OurLinkedList<T> implements IList<T> {
+	private OurNode<T> head;
 	private int count;
 
 	public OurLinkedList(){
-		head = new OurNode(null);
+		head = null;
 		count = 0;
 	}
 
-	@Override
-	public void add(Object o) {
 
-	}
+    @Override
+    public void add(T o) {
+        OurNode<T> temp = new OurNode(o);
+        OurNode<T> curr = head;
 
-	@Override
-	public void add(int index, Object o) {
+        while (curr.getNext() != null) {
+            curr = curr.getNext();
+        }
+        curr.setNext(temp);
+        count++;
+    }
 
-	}
+    @Override
+    public void add(int index, T o) {
+        OurNode<T> temp = new OurNode<T>(o);
+        OurNode<T> curr = head;
+        
+        while (curr.getNext() != null) {
+            curr = curr.getNext();
+        }
+        temp.setNext(curr.getNext());
+        curr.setNext(temp);
+        count++;
+    }
 
-	@Override
-	public Object get(int index) {
-		return null;
-	}
+    @Override
+    public T get(int index) {
+	    if (index <= 0)
+	        return null;
 
-	@Override
-	public void remove(Object o) {
+	    OurNode<T> curr = head.getNext();
+	    for (int i = 1; i < index; i++){
+	        if (curr.getNext() == null){
+                return null;
 
-	}
+            }
+            curr = curr.getNext();
+        }
+        return curr.getData();
+    }
 
-	@Override
-	public void remove(int index) {
+    @Override
+    public void remove(T o) {
 
-	}
+    }
 
-	@Override
+    @Override
+    public void remove(int index) {
+
+    }
+
+    @Override
 	public int size() {
-		return 0;
+		return count;
 	}
 
 	@Override
 	public boolean isEmpty() {
+	    if (count == 0)
+	        return true;
 		return false;
 	}
 }
