@@ -9,14 +9,13 @@ public class Main {
 
 
         OurLinkedList<Integer> linkedNumbers = new OurLinkedList<>();
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 11; i++){
             linkedNumbers.add(i);
         }
 
-        linkedNumbers.add(2,4);
         System.out.println("SIZE: "+ linkedNumbers.size());
-
-        for (int i = 0; i < linkedNumbers.size(); i++){
+        linkedNumbers.add(4,10);
+        for (int i = 1; i < linkedNumbers.size(); i++){
             System.out.println(linkedNumbers.get(i));
         }
 

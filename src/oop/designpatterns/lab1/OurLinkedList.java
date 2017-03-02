@@ -8,29 +8,31 @@ public class OurLinkedList<T> implements IList<T> {
 	private int count;
 
 	public OurLinkedList(){
-		head = null;
+		head = new OurNode(null);
 		count = 0;
 	}
 
 
     @Override
     public void add(T o) {
+
         OurNode<T> temp = new OurNode(o);
         OurNode<T> curr = head;
 
         while (curr.getNext() != null) {
             curr = curr.getNext();
         }
+
         curr.setNext(temp);
         count++;
     }
 
     @Override
     public void add(int index, T o) {
-        OurNode<T> temp = new OurNode<T>(o);
+        OurNode<T> temp = new OurNode(o);
         OurNode<T> curr = head;
-        
-        while (curr.getNext() != null) {
+
+        for (int i = 1; (i < index && curr.getNext() != null) ; i++) {
             curr = curr.getNext();
         }
         temp.setNext(curr.getNext());
@@ -40,15 +42,14 @@ public class OurLinkedList<T> implements IList<T> {
 
     @Override
     public T get(int index) {
-	    if (index <= 0)
-	        return null;
-
+        if(index <= 0)
+            return null;
 	    OurNode<T> curr = head.getNext();
 	    for (int i = 1; i < index; i++){
 	        if (curr.getNext() == null){
                 return null;
-
             }
+
             curr = curr.getNext();
         }
         return curr.getData();
@@ -71,8 +72,6 @@ public class OurLinkedList<T> implements IList<T> {
 
 	@Override
 	public boolean isEmpty() {
-	    if (count == 0)
-	        return true;
-		return false;
+	    return head == null;
 	}
 }
