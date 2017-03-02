@@ -1,27 +1,50 @@
 package oop.designpatterns.lab1;
 
-import java.util.Iterator;
+import javax.naming.OperationNotSupportedException;
+import java.util.*;
 
 /**
  * Created by Anton on 2017-03-02.
  */
-public class OurArrayList<T> implements IList<T>, Iterable{
+public class OurArrayList<T> extends AbstractList<T> {
 
     private T[] arr = (T[])new Object[10];
     private int size = 0;
 
     @Override
-    public void add(T o) {
+    public boolean add(T o) {
         if(size==arr.length)
             increaseSize();
         arr[size] = o;
         size++;
+
+        return true;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        for(int i = 0; i < size; i++){
+            if(o.equals(arr[i])){
+                remove(i);
+                size--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    @Override
+    public void clear() {
+        arr = (T[])new Object[10];
+        size = 0;
     }
 
     @Override
     public void add(int index, T o) {
-        if(size==arr.length)
-            increaseSize();
+
+        if(index > size() || index < 0)
+            throw new IndexOutOfBoundsException();
 
         for(int i = size; i > index; i--){
             arr[i] = arr[i-1];
@@ -32,33 +55,79 @@ public class OurArrayList<T> implements IList<T>, Iterable{
 
     @Override
     public T get(int index) {
+
+        if(index < 0 || index > size())
+            throw new IndexOutOfBoundsException();
+
         return arr[index];
     }
 
     @Override
-    public void remove(T o) {
-        for(int i = 0; i < size; i++){
-            if(o.equals(arr[i])){
-                remove(i);
-            }
-        }
+    public T set(int index, T element) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public void remove(int index) {
+    public T remove(int index) {
+
+        if(index < 0 || index > size())
+            throw new IndexOutOfBoundsException();
+
+        T temp = arr[index];
+
+        System.arraycopy(arr, index, arr, index+1, size-index);
+
+        /*
         for(int i = index; i < size-1; i++){
             arr[i] = arr[i+1];
         }
+        */
+
+        size--;
+        return temp;
+    }
+
+
+    @Override
+    public ListIterator<T> listIterator() {
+        return new MyListIterator();
     }
 
     @Override
-    public int size() {
-        return size;
+    public ListIterator<T> listIterator(int index) {
+        if(index < 0  || index > size())
+            throw new IndexOutOfBoundsException();
+
+
+        return new MyListIterator(index);
     }
 
     @Override
-    public boolean isEmpty() {
-        return size==0;
+    public List<T> subList(int fromIndex, int toIndex) {
+
+        if(fromIndex > toIndex || toIndex > size() || fromIndex < 0)
+            throw new IndexOutOfBoundsException();
+
+        return null;
+    }
+
+
+    public boolean equals(Object o){
+
+        if(!(o instanceof List))
+            return false;
+
+        List other = (List)o;
+
+        if(other.size()!=size())
+            return false;
+
+        for(int i = 0; i < size(); i++){
+            if(!arr[i].equals(other.get(i)))
+                return false;
+        }
+
+        return true;
     }
 
     private void increaseSize(){
@@ -73,11 +142,102 @@ public class OurArrayList<T> implements IList<T>, Iterable{
     }
 
     @Override
-    public Iterator iterator() {
+    public Iterator<T> iterator() {
         return new MyIterator();
     }
 
-    private class MyIterator implements Iterator{
+    private class SubList extends AbstractList<T>{
+
+        private int floor, roof;
+
+        public SubList(int fromIndex, int toIndex){
+            this.floor = fromIndex;
+            this.roof = toIndex;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return null;
+        }
+
+        @Override
+        public boolean add(T t) {
+            OurArrayList.this.add(roof, t);
+            return true;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            int index = OurArrayList.this.indexOf(o);
+            if(index > floor && index < roof)
+                return OurArrayList.this.remove(o);
+            else{
+                return false;
+            }
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            return OurArrayList.this.addAll(c);
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends T> c) {
+            return OurArrayList.this.addAll(index, c);
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            return OurArrayList.this.removeAll(c);
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            return OurArrayList.this.retainAll(c);
+        }
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public T get(int index) {
+            return null;
+        }
+
+        @Override
+        public T set(int index, T element) {
+            return OurArrayList.this.set(index, element);
+        }
+
+        @Override
+        public void add(int index, T element) {
+
+        }
+
+        @Override
+        public T remove(int index) {
+            return null;
+        }
+
+        @Override
+        public ListIterator<T> listIterator() {
+            return null;
+        }
+
+        @Override
+        public ListIterator<T> listIterator(int index) {
+            return null;
+        }
+
+        @Override
+        public List<T> subList(int fromIndex, int toIndex) {
+            return null;
+        }
+    }
+
+    private class MyIterator implements Iterator<T>{
         int cursor = 0;
 
         @Override
@@ -89,6 +249,120 @@ public class OurArrayList<T> implements IList<T>, Iterable{
         public T next() {
             return arr[cursor++];
         }
+
+        @Override
+        public void remove() {
+            OurArrayList.this.remove(cursor-1);
+        }
+    }
+
+    private class MyListIterator implements ListIterator<T>{
+
+        boolean added = false,
+                removed = false,
+                isTraversedBackward=false,
+                isTraversedForward=false;
+
+        int cursor = 0;
+
+        public MyListIterator(int index){
+            cursor = index;
+        }
+
+        public MyListIterator(){}
+
+        @Override
+        public boolean hasNext() {
+            return cursor < size();
+        }
+
+        @Override
+        public T next() {
+            if(cursor >= size)
+                throw new NoSuchElementException();
+
+            isTraversedForward = true;
+            removed = false;
+            added = false;
+
+            return arr[cursor++];
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return cursor > 0;
+        }
+
+        @Override
+        public T previous() {
+            if(cursor <= 0)
+                throw new NoSuchElementException();
+
+            isTraversedBackward = true;
+            removed = false;
+            added = false;
+
+            return arr[--cursor];
+        }
+
+        @Override
+        public int nextIndex() {
+                return cursor;
+        }
+
+        @Override
+        public int previousIndex() {
+            return cursor - 1;
+        }
+
+        @Override
+        public void remove() {
+            if(removed || added)
+                throw new IllegalStateException();
+            if(!isTraversedBackward || !isTraversedForward)
+                throw new IllegalStateException();
+
+            OurArrayList.this.remove(cursor);
+            removed = true;
+        }
+
+        @Override
+        public void set(T t) {
+            if(removed || added)
+                throw new IllegalStateException();
+            if(!isTraversedBackward || !isTraversedForward)
+                throw new IllegalStateException();
+
+            OurArrayList.this.remove(cursor);
+            OurArrayList.this.add(cursor, t);
+        }
+
+        @Override
+        public void add(T t) {
+            OurArrayList.this.add(cursor, t);
+            added = true;
+        }
+    }
+
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends T> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException();
     }
 
 }
