@@ -24,6 +24,7 @@ public class OurLinkedList<T> extends AbstractList<T> {
         while (curr.getNext() != null) {
             curr = curr.getNext();
         }
+        temp.setPrev(curr);
 
         curr.setNext(temp);
         size++;
@@ -40,9 +41,12 @@ public class OurLinkedList<T> extends AbstractList<T> {
         OurNode<T> temp = new OurNode(o);
         OurNode<T> curr = head;
 
+
+
         for (int i = 1; (i < index && curr.getNext() != null) ; i++) {
             curr = curr.getNext();
         }
+        temp.setPrev(curr);
         temp.setNext(curr.getNext());
         curr.setNext(temp);
         size++;
@@ -85,7 +89,7 @@ public class OurLinkedList<T> extends AbstractList<T> {
             if(curr == null)
                 return false;
         }
-
+        prev.setPrev(curr.getPrev());
         prev.setNext(curr.getNext());
         size--;
         return true;
@@ -111,10 +115,21 @@ public class OurLinkedList<T> extends AbstractList<T> {
             curr = curr.getNext();
         }
         T temp = curr.getNext().getData();
+        curr.setPrev(curr.getPrev().getPrev());
         curr.setNext(curr.getNext().getNext());
         size--;
 
         return temp;
+    }
+
+    @Override
+    public ListIterator<T> listIterator() {
+        return new MyListIterator();
+    }
+
+    @Override
+    public ListIterator<T> listIterator(int i) {
+        return new MyListIterator(i);
     }
 
     @Override
@@ -165,49 +180,89 @@ public class OurLinkedList<T> extends AbstractList<T> {
 
     private class MyListIterator implements ListIterator<T>{
 
+        boolean added = false,
+                removed = false,
+                isTraversedBackward=false,
+                isTraversedForward=false;
+
+        int cursor = 0;
+
+        public MyListIterator(int index){
+            cursor = index;
+        }
+
+        public MyListIterator(){}
+
         @Override
         public boolean hasNext() {
-            return false;
+            return cursor < size();
         }
 
         @Override
         public T next() {
-            return null;
+            if(cursor >= size)
+                throw new NoSuchElementException();
+
+            isTraversedForward = true;
+            removed = false;
+            added = false;
+
+            return get(cursor++);
         }
 
         @Override
         public boolean hasPrevious() {
-            return false;
+            return cursor > 0;
         }
 
         @Override
         public T previous() {
-            return null;
+            if(cursor <= 0)
+                throw new NoSuchElementException();
+
+            isTraversedBackward = true;
+            removed = false;
+            added = false;
+
+            return get(--cursor);
         }
 
         @Override
         public int nextIndex() {
-            return 0;
+            return cursor;
         }
 
         @Override
         public int previousIndex() {
-            return 0;
+            return cursor - 1;
         }
 
         @Override
         public void remove() {
+            if(removed || added)
+                throw new IllegalStateException();
+            if(!isTraversedBackward || !isTraversedForward)
+                throw new IllegalStateException();
 
+            OurLinkedList.this.remove(cursor);
+            removed = true;
         }
 
         @Override
         public void set(T t) {
+            if(removed || added)
+                throw new IllegalStateException();
+            if(!isTraversedBackward || !isTraversedForward)
+                throw new IllegalStateException();
 
+            OurLinkedList.this.remove(cursor);
+            OurLinkedList.this.add(cursor, t);
         }
 
         @Override
         public void add(T t) {
-
+            OurLinkedList.this.add(cursor, t);
+            added = true;
         }
     }
 

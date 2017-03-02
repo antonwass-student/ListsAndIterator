@@ -13,7 +13,7 @@ public class Main {
         //performanceTest(list);
 
 
-        IList<Integer> linkedList = new OurLinkedList<>();
+        OurLinkedList<Integer> linkedList = new OurLinkedList<>();
 
         for(int i = 0; i < 100; i++)
             linkedList.add(i);
@@ -23,8 +23,8 @@ public class Main {
         linkedList.remove(3);
         linkedList.remove((Integer)5);
 
-        for(int i = 0; i < 100; i++)
-            System.out.println(linkedList.get(i));
+        for(Integer i : linkedList)
+            System.out.println(i);
 
 
     }

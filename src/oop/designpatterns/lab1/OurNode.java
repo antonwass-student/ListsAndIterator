@@ -7,6 +7,7 @@ public class OurNode<T>{
 
     private T data;
     private OurNode<T> next;
+    private OurNode<T> prev;
 
     public OurNode(T item){
         data = item;
@@ -21,7 +22,16 @@ public class OurNode<T>{
         return next;
     }
 
-    public void setNext(OurNode next){
+
+    public void setNext(OurNode<T> next) {
         this.next = next;
+    }
+
+    public OurNode<T> getPrev() {
+        return prev;
+    }
+
+    public void setPrev(OurNode<T> prev) {
+        this.prev = prev;
     }
 }
