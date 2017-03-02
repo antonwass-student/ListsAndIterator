@@ -156,21 +156,29 @@ public class OurArrayList<T> extends AbstractList<T> {
         }
 
         @Override
+        public int size() {
+            return roof - floor;
+        }
+
+        @Override
         public Iterator<T> iterator() {
-            return null;
+            return new SubIterator();
         }
 
         @Override
         public boolean add(T t) {
             OurArrayList.this.add(roof, t);
+            roof++;
             return true;
         }
 
         @Override
         public boolean remove(Object o) {
             int index = OurArrayList.this.indexOf(o);
-            if(index > floor && index < roof)
+            if(index > floor && index < roof){
+                roof--;
                 return OurArrayList.this.remove(o);
+            }
             else{
                 return false;
             }
@@ -198,12 +206,25 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         @Override
         public void clear() {
+            Iterator it = iterator();
 
+            if(!it.hasNext())
+                return;
+
+            it.next();
+
+            while(it.hasNext()){
+                it.remove();
+                it.next();
+            }
         }
 
         @Override
         public T get(int index) {
-            return null;
+            if(floor + index > roof)
+                throw new IndexOutOfBoundsException();
+
+            return OurArrayList.this.get(floor+index);
         }
 
         @Override
@@ -213,27 +234,137 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         @Override
         public void add(int index, T element) {
+            if(floor + index > roof)
+                throw new IndexOutOfBoundsException();
 
+            OurArrayList.this.add(floor+index, element);
+            roof++;
         }
 
         @Override
         public T remove(int index) {
-            return null;
+            if(floor + index > roof)
+                throw new IndexOutOfBoundsException();
+            roof--;
+            return OurArrayList.this.remove(floor+index);
         }
 
         @Override
         public ListIterator<T> listIterator() {
-            return null;
+            return new MyListIterator();
         }
 
         @Override
         public ListIterator<T> listIterator(int index) {
-            return null;
+            return new MyListIterator(index);
         }
 
         @Override
         public List<T> subList(int fromIndex, int toIndex) {
-            return null;
+            return new SubList(fromIndex, toIndex);
+        }
+
+        private class SubIterator implements Iterator<T>{
+            int cursor = floor;
+            boolean removed = false;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < roof;
+            }
+
+            @Override
+            public T next() {
+                if(cursor == roof)
+                    throw new NoSuchElementException();
+
+                return arr[cursor++];
+            }
+
+            @Override
+            public void remove() {
+                if(removed)
+                    throw new IllegalStateException();
+                roof--;
+                OurArrayList.this.remove(cursor - 1);
+                removed = true;
+            }
+        }
+
+        private class SubListIterator implements ListIterator<T>{
+            boolean removed = false, added = false, traversed = false;
+
+            int cursor = floor;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < roof;
+            }
+
+            @Override
+            public T next() {
+                if(cursor==roof)
+                    throw new NoSuchElementException();
+
+                removed = false;
+                added = false;
+                traversed = true;
+                return arr[cursor++];
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return cursor > floor;
+            }
+
+            @Override
+            public T previous() {
+                if(cursor == floor)
+                    throw new NoSuchElementException();
+                removed = false;
+                added = false;
+                traversed = true;
+                return arr[--cursor];
+            }
+
+            @Override
+            public int nextIndex() {
+                if(cursor==roof)
+                    return roof - floor;
+                return cursor + 1 - floor;
+            }
+
+            @Override
+            public int previousIndex() {
+                if(cursor == floor)
+                    return -1;
+                return cursor - 1 - floor;
+            }
+
+            @Override
+            public void remove() {
+                if(added)
+                    throw new IllegalStateException();
+                roof--;
+                OurArrayList.this.remove(cursor);
+                removed = true;
+            }
+
+            @Override
+            public void set(T t) {
+                if(removed || added || !traversed)
+                    throw new IllegalStateException();
+
+                OurArrayList.this.remove(cursor - 1);
+                OurArrayList.this.add(cursor - 1, t);
+            }
+
+            @Override
+            public void add(T t) {
+                OurArrayList.this.add(cursor, t);
+                roof++;
+                added = true;
+            }
         }
     }
 
