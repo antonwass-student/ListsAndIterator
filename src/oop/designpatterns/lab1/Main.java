@@ -18,6 +18,12 @@ public class Main {
         for (int i = 1; i < linkedNumbers.size(); i++){
             System.out.println(linkedNumbers.get(i));
         }
+        System.out.println("----------");
+
+        linkedNumbers.remove((Integer)10);
+        for (int i = 1; i < linkedNumbers.size(); i++){
+            System.out.println(linkedNumbers.get(i));
+        }
 
 
     }

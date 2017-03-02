@@ -57,12 +57,27 @@ public class OurLinkedList<T> implements IList<T> {
 
     @Override
     public void remove(T o) {
+       
 
     }
 
+
     @Override
     public void remove(int index) {
+        if (index < 1 || index > size()){
+            return;
+        }
 
+        OurNode<T> curr = head;
+
+        for (int i = 1; i < index; i++){
+            if (curr.getNext() == null)
+                return;
+
+            curr = curr.getNext();
+        }
+        curr.setNext(curr.getNext().getNext());
+        count--;
     }
 
     @Override
