@@ -9,7 +9,6 @@ import java.util.*;
 public class OurArrayList<T> extends AbstractList<T> {
 
     private T[] arr = (T[])new Object[10];
-    private int size = 0;
 
     @Override
     public boolean add(T o) {
@@ -75,13 +74,10 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         T temp = arr[index];
 
-        System.arraycopy(arr, index, arr, index+1, size-index);
-
-        /*
         for(int i = index; i < size-1; i++){
             arr[i] = arr[i+1];
         }
-        */
+
 
         size--;
         return temp;
@@ -108,7 +104,7 @@ public class OurArrayList<T> extends AbstractList<T> {
         if(fromIndex > toIndex || toIndex > size() || fromIndex < 0)
             throw new IndexOutOfBoundsException();
 
-        return null;
+        return new SubList(fromIndex, toIndex);
     }
 
 
@@ -149,15 +145,12 @@ public class OurArrayList<T> extends AbstractList<T> {
     private class SubList extends AbstractList<T>{
 
         private int floor, roof;
+        private int subSize;
 
         public SubList(int fromIndex, int toIndex){
             this.floor = fromIndex;
             this.roof = toIndex;
-        }
-
-        @Override
-        public int size() {
-            return roof - floor;
+            this.subSize = roof - floor;
         }
 
         @Override
@@ -168,16 +161,21 @@ public class OurArrayList<T> extends AbstractList<T> {
         @Override
         public boolean add(T t) {
             OurArrayList.this.add(roof, t);
-            roof++;
+            subSize++;
             return true;
         }
 
         @Override
         public boolean remove(Object o) {
+
             int index = OurArrayList.this.indexOf(o);
-            if(index > floor && index < roof){
-                roof--;
-                return OurArrayList.this.remove(o);
+
+            if(index >= floor && index <= floor+subSize){
+                if(OurArrayList.this.remove(o)){
+                    subSize--;
+                    return true;
+                }else
+                    return false;
             }
             else{
                 return false;
@@ -206,7 +204,8 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         @Override
         public void clear() {
-            Iterator it = iterator();
+
+            Iterator it = SubList.this.iterator();
 
             if(!it.hasNext())
                 return;
@@ -215,13 +214,13 @@ public class OurArrayList<T> extends AbstractList<T> {
 
             while(it.hasNext()){
                 it.remove();
-                it.next();
+                System.out.println("next " + it.next());
             }
         }
 
         @Override
         public T get(int index) {
-            if(floor + index > roof)
+            if(index > subSize)
                 throw new IndexOutOfBoundsException();
 
             return OurArrayList.this.get(floor+index);
@@ -234,29 +233,29 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         @Override
         public void add(int index, T element) {
-            if(floor + index > roof)
+            if(index > subSize)
                 throw new IndexOutOfBoundsException();
 
             OurArrayList.this.add(floor+index, element);
-            roof++;
+            //subSize++;
         }
 
         @Override
         public T remove(int index) {
             if(floor + index > roof)
                 throw new IndexOutOfBoundsException();
-            roof--;
+            subSize--;
             return OurArrayList.this.remove(floor+index);
         }
 
         @Override
         public ListIterator<T> listIterator() {
-            return new MyListIterator();
+            return new SubIterator();
         }
 
         @Override
         public ListIterator<T> listIterator(int index) {
-            return new MyListIterator(index);
+            return new SubIterator(index);
         }
 
         @Override
@@ -264,52 +263,35 @@ public class OurArrayList<T> extends AbstractList<T> {
             return new SubList(fromIndex, toIndex);
         }
 
-        private class SubIterator implements Iterator<T>{
-            int cursor = floor;
-            boolean removed = false;
-
-            @Override
-            public boolean hasNext() {
-                return cursor < roof;
-            }
-
-            @Override
-            public T next() {
-                if(cursor == roof)
-                    throw new NoSuchElementException();
-
-                return arr[cursor++];
-            }
-
-            @Override
-            public void remove() {
-                if(removed)
-                    throw new IllegalStateException();
-                roof--;
-                OurArrayList.this.remove(cursor - 1);
-                removed = true;
-            }
-        }
-
-        private class SubListIterator implements ListIterator<T>{
+        private class SubIterator implements ListIterator<T>{
+            int cursor = 0;
             boolean removed = false, added = false, traversed = false;
+            int lastRet = -1;
 
-            int cursor = floor;
+            public SubIterator(int index){
+                cursor = index;
+            }
+
+            public SubIterator(){
+
+            }
 
             @Override
             public boolean hasNext() {
-                return cursor < roof;
+                return cursor <= subSize;
             }
 
             @Override
             public T next() {
-                if(cursor==roof)
+                if(cursor > subSize)
                     throw new NoSuchElementException();
 
                 removed = false;
                 added = false;
                 traversed = true;
-                return arr[cursor++];
+
+                lastRet = cursor;
+                return SubList.this.get(cursor++);
             }
 
             @Override
@@ -319,35 +301,36 @@ public class OurArrayList<T> extends AbstractList<T> {
 
             @Override
             public T previous() {
-                if(cursor == floor)
+                if(cursor == 0)
                     throw new NoSuchElementException();
                 removed = false;
                 added = false;
                 traversed = true;
-                return arr[--cursor];
+                lastRet = cursor;
+                return SubList.this.get(--cursor);
+            }
+
+            @Override
+            public void remove() {
+                if(added || removed || !traversed)
+                    throw new IllegalStateException();
+                SubList.this.remove(lastRet);
+                cursor = lastRet;
+                removed = true;
             }
 
             @Override
             public int nextIndex() {
-                if(cursor==roof)
-                    return roof - floor;
-                return cursor + 1 - floor;
+                if(cursor==subSize)
+                    return subSize;
+                return cursor + 1;
             }
 
             @Override
             public int previousIndex() {
                 if(cursor == floor)
                     return -1;
-                return cursor - 1 - floor;
-            }
-
-            @Override
-            public void remove() {
-                if(added)
-                    throw new IllegalStateException();
-                roof--;
-                OurArrayList.this.remove(cursor);
-                removed = true;
+                return cursor - 1;
             }
 
             @Override
@@ -355,14 +338,13 @@ public class OurArrayList<T> extends AbstractList<T> {
                 if(removed || added || !traversed)
                     throw new IllegalStateException();
 
-                OurArrayList.this.remove(cursor - 1);
-                OurArrayList.this.add(cursor - 1, t);
+                SubList.this.remove(cursor - 1);
+                SubList.this.add(cursor - 1, t);
             }
 
             @Override
             public void add(T t) {
-                OurArrayList.this.add(cursor, t);
-                roof++;
+                SubList.this.add(cursor, t);
                 added = true;
             }
         }

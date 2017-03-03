@@ -6,6 +6,7 @@ public class Main {
 
     public static void main(String[] args) {
 	    List<Integer> list = new OurArrayList<>();
+        new ArrayList<>();
 
         //funcTest(list);
 
@@ -13,20 +14,16 @@ public class Main {
         //performanceTest(list);
 
 
-        OurLinkedList<Integer> linkedList = new OurLinkedList<>();
+        for(int i = 0; i < 50; i++){
+            list.add(i);
+        }
 
-        for(int i = 0; i < 100; i++)
-            linkedList.add(i);
+        ListIterator<Integer> it = list.subList(20,30).listIterator();
 
-        linkedList.add(8, 10000);
-        linkedList.add(2, 10000);
-        linkedList.remove(3);
-        linkedList.remove((Integer)5);
-
-        for(Integer i : linkedList)
-            System.out.println(i);
-
-
+        System.out.println(it.next());
+        it.add(-10);
+        System.out.println(it.next());
+        System.out.println(it.next());
     }
 
     public static void funcTest(List<Integer> list){
