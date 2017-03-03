@@ -214,7 +214,7 @@ public class OurArrayList<T> extends AbstractList<T> {
 
             while(it.hasNext()){
                 it.remove();
-                System.out.println("next " + it.next());
+                it.next();
             }
         }
 
@@ -268,6 +268,8 @@ public class OurArrayList<T> extends AbstractList<T> {
             boolean removed = false, added = false, traversed = false;
             int lastRet = -1;
 
+            int startSize = OurArrayList.this.size();
+
             public SubIterator(int index){
                 cursor = index;
             }
@@ -286,6 +288,9 @@ public class OurArrayList<T> extends AbstractList<T> {
                 if(cursor > subSize)
                     throw new NoSuchElementException();
 
+                if(startSize != OurArrayList.this.size())
+                    throw new ConcurrentModificationException();
+
                 removed = false;
                 added = false;
                 traversed = true;
@@ -303,6 +308,10 @@ public class OurArrayList<T> extends AbstractList<T> {
             public T previous() {
                 if(cursor == 0)
                     throw new NoSuchElementException();
+
+                if(startSize != OurArrayList.this.size())
+                    throw new ConcurrentModificationException();
+
                 removed = false;
                 added = false;
                 traversed = true;
@@ -314,6 +323,11 @@ public class OurArrayList<T> extends AbstractList<T> {
             public void remove() {
                 if(added || removed || !traversed)
                     throw new IllegalStateException();
+
+                if(startSize != OurArrayList.this.size())
+                    throw new ConcurrentModificationException();
+
+                startSize--;
                 SubList.this.remove(lastRet);
                 cursor = lastRet;
                 removed = true;
@@ -338,12 +352,20 @@ public class OurArrayList<T> extends AbstractList<T> {
                 if(removed || added || !traversed)
                     throw new IllegalStateException();
 
+                if(startSize != OurArrayList.this.size())
+                    throw new ConcurrentModificationException();
+
                 SubList.this.remove(cursor - 1);
                 SubList.this.add(cursor - 1, t);
             }
 
             @Override
             public void add(T t) {
+
+                if(startSize != OurArrayList.this.size())
+                    throw new ConcurrentModificationException();
+
+                startSize++;
                 SubList.this.add(cursor, t);
                 added = true;
             }
@@ -353,6 +375,8 @@ public class OurArrayList<T> extends AbstractList<T> {
     private class MyIterator implements Iterator<T>{
         int cursor = 0;
 
+        int startSize = OurArrayList.this.size();
+
         @Override
         public boolean hasNext() {
             return cursor<size();
@@ -360,11 +384,16 @@ public class OurArrayList<T> extends AbstractList<T> {
 
         @Override
         public T next() {
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
             return arr[cursor++];
         }
 
         @Override
         public void remove() {
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
+            startSize--;
             OurArrayList.this.remove(cursor-1);
         }
     }
@@ -377,6 +406,8 @@ public class OurArrayList<T> extends AbstractList<T> {
                 isTraversedForward=false;
 
         int cursor = 0;
+
+        int startSize = OurArrayList.this.size();
 
         public MyListIterator(int index){
             cursor = index;
@@ -394,6 +425,9 @@ public class OurArrayList<T> extends AbstractList<T> {
             if(cursor >= size)
                 throw new NoSuchElementException();
 
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
+
             isTraversedForward = true;
             removed = false;
             added = false;
@@ -410,6 +444,9 @@ public class OurArrayList<T> extends AbstractList<T> {
         public T previous() {
             if(cursor <= 0)
                 throw new NoSuchElementException();
+
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
 
             isTraversedBackward = true;
             removed = false;
@@ -435,6 +472,10 @@ public class OurArrayList<T> extends AbstractList<T> {
             if(!isTraversedBackward || !isTraversedForward)
                 throw new IllegalStateException();
 
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
+
+            startSize--;
             OurArrayList.this.remove(cursor);
             removed = true;
         }
@@ -446,12 +487,20 @@ public class OurArrayList<T> extends AbstractList<T> {
             if(!isTraversedBackward || !isTraversedForward)
                 throw new IllegalStateException();
 
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
+
             OurArrayList.this.remove(cursor);
             OurArrayList.this.add(cursor, t);
         }
 
         @Override
         public void add(T t) {
+
+            if(startSize != OurArrayList.this.size())
+                throw new ConcurrentModificationException();
+
+            startSize++;
             OurArrayList.this.add(cursor, t);
             added = true;
         }

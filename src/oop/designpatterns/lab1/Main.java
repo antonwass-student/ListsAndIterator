@@ -5,7 +5,7 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-	    List<Integer> list = new OurArrayList<>();
+	    List<Integer> list = new OurLinkedList<>();
         new ArrayList<>();
 
         //funcTest(list);
@@ -18,12 +18,14 @@ public class Main {
             list.add(i);
         }
 
-        ListIterator<Integer> it = list.subList(20,30).listIterator();
+        list.subList(20,30).clear();
 
-        System.out.println(it.next());
-        it.add(-10);
-        System.out.println(it.next());
-        System.out.println(it.next());
+        for(Integer i: list){
+            System.out.println(i);
+        }
+
+
+
     }
 
     public static void funcTest(List<Integer> list){
